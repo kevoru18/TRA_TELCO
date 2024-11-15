@@ -209,12 +209,13 @@ def upload_file():
                 # Consulta de media de intentos para contacto
                 query_media_intentos = text("""
                     SELECT CASE 
-                        WHEN COUNT(*) >= 20 THEN ( COUNT(*)/CAST(SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END) AS FLOAT)) 
-                        ELSE (20.0/SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END))  
+                        WHEN COUNT(*) >= 20 THEN (COUNT(*) / CAST(NULLIF(SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END), 0) AS FLOAT)) 
+                        ELSE (20.0 / NULLIF(SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END), 0))  
                     END AS conteo 
-                    FROM ODCalls WHERE ANI = :telefono AND Duration > 1
-                    ) AS llamadas
+                    FROM ODCalls 
+                    WHERE ANI = :telefono AND Duration > 1
                 """)
+
                 result_media_intentos = conn.execute(query_media_intentos, {'telefono': telefono}).fetchone()
                 media_intentos = result_media_intentos[0] if result_media_intentos else None
                 df.at[index, 'media_intentos_para_contacto'] = media_intentos
