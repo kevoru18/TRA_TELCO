@@ -50,14 +50,10 @@ def graficos():
         return render_template('graficos.html')
 
 # Ruta para la tercera opción, actualmente pendiente de definir
+
 @app.route('/pendiente')
 def pendiente():
-<<<<<<< HEAD
-    return ' <title>Telco Customer Care</title><h1>Esta función está pendiente de implementación</h1>'
-=======
-    return "<h1>Esta función está pendiente de implementación</h1>"
->>>>>>> fede80/main
-
+    return render_template('pendiente.html')
 
 # Configuración de la base de datos
 DATABASE_URI = "mssql+pyodbc://sa:infinity@192.168.201.12/HERMESV5_HISTORICO?driver=ODBC+Driver+17+for+SQL+Server"
@@ -213,14 +209,6 @@ def upload_file():
                 # Consulta de media de intentos para contacto
                 query_media_intentos = text("""
                     SELECT CASE 
-<<<<<<< HEAD
-                        WHEN COUNT(*) >= 20 THEN ( COUNT(*)/CAST(SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END) AS FLOAT)) 
-                        ELSE (20.0/SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END))  
-                    END AS conteo 
-                    FROM ODCalls WHERE ANI = :telefono AND Duration > 1
-                    ) AS llamadas
-                """)
-=======
                         WHEN COUNT(*) >= 20 THEN (COUNT(*) / CAST(NULLIF(SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END), 0) AS FLOAT)) 
                         ELSE (20.0 / NULLIF(SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END), 0))  
                     END AS conteo 
@@ -228,7 +216,6 @@ def upload_file():
                     WHERE ANI = :telefono AND Duration > 1
                 """)
 
->>>>>>> fede80/main
                 result_media_intentos = conn.execute(query_media_intentos, {'telefono': telefono}).fetchone()
                 media_intentos = result_media_intentos[0] if result_media_intentos else None
                 df.at[index, 'media_intentos_para_contacto'] = media_intentos
