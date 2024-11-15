@@ -1,0 +1,47 @@
+2024-11-12 14:29:44 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-11-12 14:29:44 - [33mPress CTRL+C to quit[0m
+2024-11-12 14:29:44 -  * Restarting with watchdog (windowsapi)
+2024-11-12 14:29:46 -  * Debugger is active!
+2024-11-12 14:29:46 -  * Debugger PIN: 942-259-191
+2024-11-12 14:38:24 -  * Detected change in 'C:\\env\\mi_proyecto_web\\app.py', reloading
+2024-11-12 14:38:24 -  * Detected change in 'C:\\env\\mi_proyecto_web\\app.py', reloading
+2024-11-12 14:38:24 -  * Detected change in 'C:\\env\\mi_proyecto_web\\app.py', reloading
+2024-11-12 14:38:24 -  * Restarting with watchdog (windowsapi)
+2024-11-12 14:39:18 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2024-11-12 14:39:18 - Added job "enviar_informe_mensual" to job store "default"
+2024-11-12 14:39:18 - Scheduler started
+2024-11-12 14:40:27 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2024-11-12 14:40:27 - Added job "enviar_informe_mensual" to job store "default"
+2024-11-12 14:40:27 - Scheduler started
+2024-11-12 14:40:27 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-11-12 14:40:27 - [33mPress CTRL+C to quit[0m
+2024-11-12 14:40:27 -  * Restarting with watchdog (windowsapi)
+2024-11-12 14:40:29 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2024-11-12 14:40:29 - Added job "enviar_informe_mensual" to job store "default"
+2024-11-12 14:40:29 - Scheduler started
+2024-11-12 14:40:29 -  * Debugger is active!
+2024-11-12 14:40:29 -  * Debugger PIN: 942-259-191
+2024-11-12 14:42:34 -  * Detected change in 'C:\\env\\mi_proyecto_web\\app.py', reloading
+2024-11-12 14:42:34 -  * Detected change in 'C:\\env\\mi_proyecto_web\\app.py', reloading
+2024-11-12 14:42:34 -  * Detected change in 'C:\\env\\mi_proyecto_web\\app.py', reloading
+2024-11-12 14:42:35 -  * Restarting with watchdog (windowsapi)
+2024-11-12 14:42:38 - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2024-11-12 14:42:38 - Added job "enviar_informe_mensual" to job store "default"
+2024-11-12 14:42:38 - Scheduler started
+2024-11-12 14:42:38 -  * Debugger is active!
+2024-11-12 14:42:38 -  * Debugger PIN: 942-259-191
+2024-11-12 14:43:26 - 127.0.0.1 - - [12/Nov/2024 14:43:26] "GET / HTTP/1.1" 200 -
+2024-11-12 14:43:27 - 127.0.0.1 - - [12/Nov/2024 14:43:27] "[36mGET /static/images/LogoTELCO.png HTTP/1.1[0m" 304 -
+2024-11-12 14:43:27 - 127.0.0.1 - - [12/Nov/2024 14:43:27] "[36mGET /static/images/simpsons-monkey.gif HTTP/1.1[0m" 304 -
+2024-11-12 14:44:18 - Usuario: fdargallo, Archivo subido: TELCO_DATA_V2.xlsm, Registros originales: 21, Teléfonos limpios: 21
+2024-11-12 14:47:26 - 127.0.0.1 - - [12/Nov/2024 14:47:26] "POST /upload HTTP/1.1" 200 -
+2024-11-12 14:47:28 - 127.0.0.1 - - [12/Nov/2024 14:47:28] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2024-11-12 14:51:42 -  * Detected change in 'C:\\env\\mi_proyecto_web\\app.py', reloading
+2024-11-12 14:51:42 -  * Detected change in 'C:\\env\\mi_proyecto_web\\app.py', reloading
+2024-11-12 14:51:42 -  * Detected change in 'C:\\env\\mi_proyecto_web\\app.py', reloading
+2024-11-12 14:51:42 -  * Detected change in 'C:\\env\\mi_proyecto_web\\app.py', reloading
+2024-11-12 14:51:43 -  * Restarting with watchdog (windowsapi)
+2024-11-12 14:53:58 -  * Restarting with watchdog (windowsapi)
+2024-11-12 15:01:40 -  * Restarting with watchdog (windowsapi)

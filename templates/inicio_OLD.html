@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Página de Inicio</title>
+</head>
+<body>
+    <h1>Bienvenido</h1>
+    <p>Selecciona una opción:</p>
+    
+    <!-- Primera imagen que enlaza a la página de carga de archivos (index) -->
+    <a href="{{ url_for('index') }}">
+        <img src="{{ url_for('static', filename='imagen1.png') }}" alt="Carga de Archivos">
+    </a>
+    
+    <!-- Segunda imagen que enlaza a la página de gráficos -->
+    <a href="{{ url_for('graficos') }}">
+        <img src="{{ url_for('static', filename='imagen2.png') }}" alt="Gráficos">
+    </a>
+    
+    <!-- Tercera imagen que enlaza a la página pendiente -->
+    <a href="{{ url_for('pendiente') }}">
+        <img src="{{ url_for('static', filename='imagen3.png') }}" alt="Función Pendiente">
+    </a>
+</body>
+</html>
