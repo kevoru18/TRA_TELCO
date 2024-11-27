@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Gráficos</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Generar Gráficos</h1>
+    <form method="POST" action="/graficos">
+        <label for="db_name">Nombre de la base de datos:</label>
+        <input type="text" id="db_name" name="db_name" required>
+        <button type="submit">Generar Gráficos</button>
+    </form>
+
+    {% if imagenes_base64 %}
+        {% for img in imagenes_base64 %}
+            {% if img %}
+                <img src="data:image/png;base64,{{ img }}" alt="Gráfico">
+            {% else %}
+                <p>No hay datos para este gráfico</p>
+            {% endif %}
+        {% endfor %}
+        <br>
+        <a href="{{ pdf_link }}">Descargar PDF</a>
+    {% endif %}
+</body>
+</html>

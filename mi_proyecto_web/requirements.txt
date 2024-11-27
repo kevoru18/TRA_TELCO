@@ -1,0 +1,8 @@
+Flask
+pyodbc
+pandas
+openpyxl
+sqlalchemy
+apscheduler
+matplotlib
+plotly
