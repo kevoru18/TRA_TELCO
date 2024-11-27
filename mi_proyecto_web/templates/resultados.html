@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados de la Limpieza y Scoring</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            word-wrap: break-word;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        td {
+            max-width: 200px; /* Ajusta el ancho máximo de cada celda */
+        }
+        .scoring {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Resultados de la Limpieza y Scoring</h1>
+    <div>
+        {{ tabla|safe }}
+    </div>
+    <br>
+    <a href="{{ url_for('download_file') }}">Descargar Excel de Resultados</a>
+</body>
+</html>

@@ -1,0 +1,29 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.image-selection {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.image-selection a {
+    text-decoration: none;
+    color: black;
+}
+
+.image-selection img {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+}
+
+.image-selection p {
+    margin-top: 10px;
+    font-weight: bold;
+}
