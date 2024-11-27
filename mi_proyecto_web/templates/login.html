@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Telco Customer Care</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/Televenta.png') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #f4f4f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .login-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .logo {
+            max-width: 200px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container text-center">
+        <img  src="{{ url_for('static', filename='images/LogoTELCO.png') }}" alt="image" title="image" style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;
+          display: inline-block !important;border: none;height: auto;float: none;width: 60%;max-width: 192.8px;" width="150.8" class="v-src-width v-src-max-width"/><br><br>
+        <form id="loginForm">
+            <div class="mb-3">
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    id="username" 
+                    placeholder="Nombre de usuario" 
+                    required 
+                    pattern="[a-zA-Z0-9_]+"
+                    maxlength="50"
+                >
+            </div>
+            <div class="mb-3">
+                <input 
+                    type="password" 
+                    class="form-control" 
+                    id="password" 
+                    placeholder="Contraseña" 
+                    required 
+                    minlength="8"
+                >
+            </div>
+            <button type="submit" class="btn btn-outline-info btn-lg" style="border-color: #3dabd4;">Ingresar</button>
+        </form>
+    </div>
+
+    <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+       // Obtener los valores de los campos de entrada del formulario
+const username = document.getElementById('username').value;
+const password = document.getElementById('password').value;
+
+// Validaciones del lado del cliente
+const usernameRegex = /^[a-zA-Z0-9_]+$/; // Expresión regular para validar el nombre de usuario
+if (!usernameRegex.test(username)) { // Verifica si el nombre de usuario no cumple con el patrón
+    alert('Nombre de usuario inválido'); // Muestra un mensaje de error
+    return; // Termina la ejecución si la validación falla
+}
+
+if (password.length < 8) { // Verifica si la contraseña tiene menos de 8 caracteres
+    alert('La contraseña debe tener al menos 8 caracteres'); // Muestra un mensaje de error
+    return; // Termina la ejecución si la validación falla
+}
+
+// Envío de datos al servidor
+fetch('/login/', { // Realiza una solicitud HTTP a la ruta '/login/'
+    method: 'POST', // Especifica el método HTTP como POST
+    headers: { // Encabezados de la solicitud
+        'Content-Type': 'application/json', // Indica que los datos se envían en formato JSON
+        'X-CSRFToken': getCookie('csrftoken') // Incluye el token CSRF en los encabezados
+    },
+    body: JSON.stringify({ username, password }) // Convierte los datos del usuario en una cadena JSON para el cuerpo de la solicitud
+})
+.then(response => response.json()) // Procesa la respuesta del servidor y la convierte en JSON
+.then(data => {
+    if (data.success) { // Verifica si el servidor indica un inicio de sesión exitoso
+        window.location.href = '/'; // Redirige al usuario al dashboard
+    } else {
+        alert(data.message); // Muestra un mensaje de error del servidor
+    }
+})
+.catch(error => {
+    console.error('Error:', error); // Muestra un error en la consola si la solicitud falla
+});
+
+    });
+// Función para obtener cookie CSRF
+function getCookie(name) {
+    let cookieValue = null; // Inicializamos el valor de la cookie como null.
+    if (document.cookie && document.cookie !== '') { // Comprobamos si el documento tiene cookies.
+        const cookies = document.cookie.split(';'); // Dividimos las cookies en un array, separándolas por el carácter ';'.
+        for (let i = 0; i < cookies.length; i++) { // Iteramos sobre cada cookie del array.
+            const cookie = cookies[i].trim(); // Eliminamos los espacios en blanco al inicio y al final de la cookie.
+            // Comprobamos si la cookie comienza con el nombre proporcionado y un signo '='.
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                // Extraemos el valor de la cookie, decodificándolo para manejar caracteres especiales.
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break; // Detenemos la iteración una vez encontramos la cookie.
+            }
+        }
+    }
+    return cookieValue; // Devolvemos el valor de la cookie, o null si no se encontró.
+}
+
+    </script>
+</body>
+</html>

@@ -43,6 +43,15 @@ def index():
 def main_app():
     return redirect(url_for('index'))  # Redirige a la función de carga de archivos
 
+
+# Ruta para la login opción
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+
+
 def get_connection(db_name):
     try:
         connection = pyodbc.connect(
