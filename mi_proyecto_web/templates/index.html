@@ -278,7 +278,7 @@ table, td { color: #ffffff; } #u_body a { color: #0000ee; text-decoration: under
 <form action="/upload" method="post" enctype="multipart/form-data">
     <div class="input-group">
         <input type="file" class="form-control" name="file" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" required>
-        <button class="btn btn-outline-secondary" type="submit" id="inputGroupFileAddon04">Subir archivo</button>
+        <button class="btn btn-outline-secondary" type="submit"  id="inputGroupFileAddon04">Subir archivo</button>
     </div>
 </form>
 
@@ -402,7 +402,7 @@ table, td { color: #ffffff; } #u_body a { color: #0000ee; text-decoration: under
   </tr>
   </tbody>
   </table>
-
+<!-- 
   <script>
     // Función para simular el progreso de carga
     function iniciarCarga() {
@@ -429,8 +429,71 @@ table, td { color: #ffffff; } #u_body a { color: #0000ee; text-decoration: under
             }
         }, 100); // Aumenta el progreso cada 100ms (ajustar si se desea más rápido o más lento)*/
     }
-</script>
+</script> -->
+<script>
+function iniciarCarga() {
+  var progreso = 0;
+        var progressBar = document.getElementById("progressBar");
+        var progressContainer = document.getElementById("progressContainer");
+        var loadingGif = document.getElementById("loadingGif");
+        var startButton = document.getElementById("inputGroupFileAddon04");
 
+        // Mostrar el GIF y la barra de progreso
+        progressContainer.style.display = "block";
+        loadingGif.style.display = "block";
+        //startButton.style.display = "none"; // Ocultar el botón
+
+        // Simular un intervalo de carga
+        /*var interval = setInterval(function() {
+            if (progreso >= 100) {
+                clearInterval(interval); // Detener el intervalo cuando llegue al 100%
+                loadingGif.style.display = "none"; // Ocultar el GIF cuando termine
+            } else {
+                progreso++;
+                progressBar.style.width = progreso + "%";
+                progressBar.innerHTML = progreso + "%";
+            }
+        }, 100); // Aumenta el progreso cada 100ms (ajustar si se desea más rápido o más lento)*/
+    
+        function checkProgress() {
+    fetch('/progress', {
+        method: 'GET', // Cambia a GET ya que solo estamos consultando el progreso
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            progressBar.style.width = data.progress + '%';
+            progressBar.innerHTML = data.progress + '%';
+
+            if (data.progress < 100) {
+                setTimeout(checkProgress, 500);
+            } else {
+                progressContainer.style.display = "none";
+                loadingGif.style.display = "none";
+
+                // Mostrar los resultados si están disponibles
+                var resultsContainer = document.getElementById("resultsContainer");
+                if (data.results) {
+                    resultsContainer.innerHTML = data.results;
+                }
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error checking progress:', error);
+    });
+}
+
+
+    checkProgress();
+}
+
+</script>
   </body>
 
 </html>

@@ -1,4 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file
+from flask import Flask, render_template, request, redirect, session, url_for, flash, send_file, jsonify, send_from_directory, Blueprint
+import time
+from flask_login import login_user, logout_user,login_required
 from sqlalchemy import create_engine, text
 import pandas as pd
 import os
@@ -24,8 +26,11 @@ import matplotlib
 matplotlib.use('Agg')  # Establece el backend 'Agg' para evitar el error de Tcl/Tk
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-
+from werkzeug.security import generate_password_hash
+from datetime import datetime
+from Model.auth import User, db
 app = Flask(__name__)
+# app = Blueprint('auth', __name__)
 app.secret_key = "your_secret_key"
 
 # Configurar logging
@@ -33,7 +38,11 @@ logging.basicConfig(level=logging.INFO)
 
 @app.route('/')
 def inicio():
-    return render_template('inicio.html')
+    # Esto debe ir en la parte del raiz 
+    if "username" in session:
+        return render_template('inicio.html')
+    return render_template('login.html')
+    # return render_template('inicio.html')
 
 @app.route('/index')
 def index():
@@ -46,9 +55,27 @@ def main_app():
 
 # Ruta para la login opción
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+  if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        # Server-side validation
+        if not User.validate_username(username):
+            return jsonify({'success': False, 'message': 'Invalid username'})
+
+        user = User.query.filter_by(username=username, is_active=True).first()
+        
+        if user and user.check_password(password):
+            user.last_login = datetime.utcnow()
+            db.session.commit()
+            login_user(user)
+            return jsonify({'success': True, 'redirect': '/dashboard'})
+        
+        return jsonify({'success': False, 'message': 'Invalid credentials'})
+    
+  return render_template('login.html')
 
 
 
@@ -335,9 +362,12 @@ def limpiar_telefono(telefono):
     telefono = re.sub(r'^(\+34|0034)', '', telefono)
     return telefono if len(telefono) == 9 and telefono.isdigit() else None
 
-
+progress = 0
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    global progress
+    total_steps = 100
+   
     if 'file' not in request.files:
         flash('No file part')
         return redirect(url_for('index'))
@@ -376,14 +406,21 @@ def upload_file():
             raise KeyError("No se encontró la columna 'telefono' en el DataFrame.")
 
         # Limpiar los teléfonos
+        total_steps = len(df) + 3  # Procesos principales + registros
         df['telefono_limpio'] = df['telefono'].apply(limpiar_telefono)
         registros_limpios = df['telefono_limpio'].notnull().sum()
 
+ # Simulación del progreso: Renombrar columnas
+        progress = int((1 / total_steps) * 100)
+        time.sleep(0.5)  # Simular demora
         # Registrar la actividad en el log
         log_usuario(nombre_usuario, file.filename, registros_originales, registros_limpios)
 
         # Conectar a la base de datos y ejecutar la lógica de scoring
         with engine.connect() as conn:
+            total_steps = 3  # Número total de pasos
+            current_step = 1
+            # send_progress_update(current_step, total_steps)
             for index, row in df.iterrows():
                 telefono = str(row['telefono'])
 
@@ -425,7 +462,12 @@ def upload_file():
                 """)
 
                 result_media_intentos_positivo = conn.execute(query_media_intentos_positivo, {'telefono': telefono}).fetchone()
-                
+                  # Actualizar el progreso
+                progress = int(((index + 2) / total_steps) * 100)
+                time.sleep(0.1)  # Simular tiempo de procesamiento
+                current_step += 1
+                # send_progress_update(current_step, total_steps)
+
                 
                 
                 # Agregar un log para depuración
@@ -469,8 +511,17 @@ def upload_file():
 
         # Generar la tabla HTML para mostrar en el navegador
         resultados_limpieza = df.to_html(classes=['table', 'scoring'], justify='center')
+          # Finalizar el progreso
+        progress = 100
+        time.sleep(0.5)
 
-        return render_template('resultados.html', tabla=resultados_limpieza)
+        return render_template('resultados.html', tabla=resultados_limpieza) #jsonify({'progress': 100, 'results': resultados_limpieza})             #      #, 
+    
+    
+@app.route('/progress', methods=['GET'])
+def get_progress():
+    global progress
+    return jsonify({'progress': progress})
 
 @app.route('/download')
 def download_file():
