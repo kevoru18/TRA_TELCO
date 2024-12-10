@@ -105,15 +105,17 @@ if (password.length < 8) { // Verifica si la contraseña tiene menos de 8 caract
     alert('La contraseña debe tener al menos 8 caracteres'); // Muestra un mensaje de error
     return; // Termina la ejecución si la validación falla
 }
+console.log({ username, password });
 
 // Envío de datos al servidor
-fetch('/login/', { // Realiza una solicitud HTTP a la ruta '/login/'
+fetch('/login', { // Realiza una solicitud HTTP a la ruta '/login/'
     method: 'POST', // Especifica el método HTTP como POST
     headers: { // Encabezados de la solicitud
         'Content-Type': 'application/json', // Indica que los datos se envían en formato JSON
         'X-CSRFToken': getCookie('csrftoken') // Incluye el token CSRF en los encabezados
     },
     body: JSON.stringify({ username, password }) // Convierte los datos del usuario en una cadena JSON para el cuerpo de la solicitud
+    
 })
 .then(response => response.json()) // Procesa la respuesta del servidor y la convierte en JSON
 .then(data => {

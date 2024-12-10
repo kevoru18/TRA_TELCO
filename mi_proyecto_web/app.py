@@ -2,9 +2,9 @@ from flask import Flask, render_template, request, redirect, session, url_for, f
 import time
 from flask_login import login_user, logout_user,login_required
 from sqlalchemy import create_engine, text
+from flask_sqlalchemy import SQLAlchemy 
 import pandas as pd
 import os
-import re
 import logging
 import pyodbc
 import getpass  # Importar el módulo para obtener el nombre del usuario
@@ -16,6 +16,7 @@ import smtplib
 from email.mime.text import MIMEText
 from db_utils import obtener_datos_kpi, obtener_datos_clicks
 from excel_utils import generar_graficos_excel
+import re
 import io
 import base64
 from matplotlib.figure import Figure
@@ -26,23 +27,24 @@ import matplotlib
 matplotlib.use('Agg')  # Establece el backend 'Agg' para evitar el error de Tcl/Tk
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from Model.auth import User, db
 app = Flask(__name__)
 # app = Blueprint('auth', __name__)
-app.secret_key = "your_secret_key"
+app.secret_key = "your_secret_key" #Esto es para evitar que los datos sean visibles en el navegador
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
-
+# Crear la instancia de SQLAlchemy
+# db = SQLAlchemy()
 @app.route('/')
 def inicio():
     # Esto debe ir en la parte del raiz 
     if "username" in session:
         return render_template('inicio.html')
     return render_template('login.html')
-    # return render_template('inicio.html')
+    
 
 @app.route('/index')
 def index():
@@ -52,30 +54,61 @@ def index():
 def main_app():
     return redirect(url_for('index'))  # Redirige a la función de carga de archivos
 
-
-# Ruta para la login opción
-
-@app.route('/login', methods=['GET', 'POST'])
+# Ruta para manejar la página de inicio de sesión
+@app.route('/login', methods=['POST'])
 def login():
-  if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+    # Verifica si el método de la solicitud es POST (cuando se envía el formulario)
+    if request.method == 'POST':
+        data=request.get_json()
+        # Obtiene el nombre de usuario enviado desde el formulario
+        username = data.get('username')
+         # Obtiene la contraseña enviada desde el formulario
+        password = data.get('password')
+        print('Username recibido:', username)
+        print('Username recibido:', password)
+        # Validación del lado del servidor: verifica que el nombre de usuario tenga un formato válido
+        # if not User.validate_username(username):
+        #     # Si el formato no es válido, devuelve un mensaje de error en formato JSON
+        #     return jsonify({'success': False, 'message': 'Invalid username'})
 
-        # Server-side validation
-        if not User.validate_username(username):
-            return jsonify({'success': False, 'message': 'Invalid username'})
-
-        user = User.query.filter_by(username=username, is_active=True).first()
+        # Busca en la base de datos un usuario con el nombre proporcionado que esté activo
+        # user = User.query.filter_by(username=username).first() #user = User.query.filter_by(username=username, is_active=True).first()
         
-        if user and user.check_password(password):
-            user.last_login = datetime.utcnow()
-            db.session.commit()
-            login_user(user)
-            return jsonify({'success': True, 'redirect': '/dashboard'})
+        # Si se encuentra el usuario y la contraseña coincide con la almacenada
+        # if user and user.check_password(password):
+        if username == 'krubi':
+            # Actualiza la fecha y hora del último inicio de sesión
+            # user.last_login = datetime.utcnow()
+            # Guarda los cambios en la base de datos
+            # db.session.commit()
+            # Inicia la sesión del usuario utilizando Flask-Login
+            # login_user(user)
+            session['username']=username
+            # Renderiza la plantilla 'inicio.html' en caso de inicio de sesión exitoso
+            print('Entro en login')
+            return jsonify({'success': True, 'redirect': '/inicio'})
+            
         
-        return jsonify({'success': False, 'message': 'Invalid credentials'})
+        # Si el usuario no existe o la contraseña es incorrecta, devuelve un mensaje de error
+        return jsonify({'success': False, 'message': 'Credenciales Invalidas'}) 
     
-  return render_template('login.html')
+    # Si el método no es POST (es GET), muestra la página de inicio de sesión
+    return render_template('login.html')
+
+
+
+# Ruta para cerrar sesión
+@app.route('/logout')  
+@login_required  # Decorador que asegura que esta ruta solo pueda ser accedida por usuarios autenticados.
+def logout():
+    """
+    Maneja la lógica de cierre de sesión del usuario autenticado.
+
+    - Elimina la sesión activa del usuario.
+    - Redirige al usuario a la página de inicio de sesión ('/login').
+    """
+    logout_user()  # Función de Flask-Login que elimina al usuario de la sesión activa.
+    return redirect('/login')  # Redirige al usuario a la página de inicio de sesión después del cierre de sesión.
 
 
 
