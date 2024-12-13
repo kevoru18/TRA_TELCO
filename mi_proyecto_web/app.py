@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, session, url_for, flash, send_file, jsonify, send_from_directory, Blueprint
 import time
-from flask_login import login_user, logout_user,login_required
+from flask_login import login_user, logout_user,login_required,LoginManager 
+
 from sqlalchemy import create_engine, text
 from flask_sqlalchemy import SQLAlchemy 
 import pandas as pd
@@ -38,6 +39,7 @@ app.secret_key = "your_secret_key" #Esto es para evitar que los datos sean visib
 logging.basicConfig(level=logging.INFO)
 # Crear la instancia de SQLAlchemy
 # db = SQLAlchemy()
+
 @app.route('/')
 def inicio():
     # Esto debe ir en la parte del raiz 
@@ -90,26 +92,21 @@ def login():
             
         
         # Si el usuario no existe o la contraseña es incorrecta, devuelve un mensaje de error
-        return jsonify({'success': False, 'message': 'Credenciales Invalidas'}) 
+        return jsonify({'success': False, 'message': 'Credenciales Invalidas'}),401 
     
     # Si el método no es POST (es GET), muestra la página de inicio de sesión
     return render_template('login.html')
 
-
+# Ver esto:https://www.youtube.com/watch?v=Fr2MxT9M0V4
 
 # Ruta para cerrar sesión
 @app.route('/logout')  
 @login_required  # Decorador que asegura que esta ruta solo pueda ser accedida por usuarios autenticados.
 def logout():
-    """
-    Maneja la lógica de cierre de sesión del usuario autenticado.
-
-    - Elimina la sesión activa del usuario.
-    - Redirige al usuario a la página de inicio de sesión ('/login').
-    """
-    logout_user()  # Función de Flask-Login que elimina al usuario de la sesión activa.
-    return redirect('/login')  # Redirige al usuario a la página de inicio de sesión después del cierre de sesión.
-
+    # logout_user()
+    session.pop('username', None) 
+    # return jsonify({'success': True, 'redirect': '/login'})
+    return redirect('login')
 
 
 def get_connection(db_name):
