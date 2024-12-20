@@ -86,13 +86,15 @@
  
   
     </div>
+   
+
 
     <script>
     document.getElementById('loginForm').addEventListener('submit', function(e) {
         e.preventDefault();
        // Obtener los valores de los campos de entrada del formulario
-const username = document.getElementById('username').value;
-const password = document.getElementById('password').value;
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
 
 // Validaciones del lado del cliente
 const usernameRegex = /^[a-zA-Z0-9_]+$/; // Expresión regular para validar el nombre de usuario
@@ -122,7 +124,8 @@ fetch('/login', { // Realiza una solicitud HTTP a la ruta '/login/'
     if (data.success) { // Verifica si el servidor indica un inicio de sesión exitoso
         window.location.href = '/'; // Redirige al usuario al dashboard
     } else {
-        alert(data.message); // Muestra un mensaje de error del servidor
+        // alert(data.message); // Muestra un mensaje de error del servidor
+        mostrarError(data.message); // Mostrar el mensaje en el modal
     }
 })
 .catch(error => {
@@ -150,4 +153,25 @@ function getCookie(name) {
 
     </script>
 </body>
+<div id="modal-error"  style="display: none; position: fixed; z-index: 1000; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-radius: 8px;">
+    <h3 id="modal-title" style="margin: 0; font-size: 18px; color: #007BFF;">Error</h3>
+    <p id="modal-message" style="margin: 0; font-size: 16px; color: #333;"></p>
+    <button onclick="cerrarModal()" style="margin-top: 10px; padding: 8px 16px; background: #007BFF; color: white; border: none; border-radius: 4px;">Aceptar</button>
+</div>
+
+
+<script>
+function mostrarError(mensaje) {
+    const modal = document.getElementById('modal-error');
+    const modalMessage = document.getElementById('modal-message');
+    modalMessage.textContent = mensaje; // Actualizar el mensaje del modal
+    modal.style.display = 'block'; // Mostrar el modal
+}
+
+function cerrarModal() {
+    document.getElementById('modal-error').style.display = 'none'; // Ocultar el modal
+}
+</script>
+
+
 </html>

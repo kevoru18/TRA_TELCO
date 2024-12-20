@@ -36,9 +36,10 @@ class User(db.Model):  # La clase `User` hereda de `db.Model`, lo que la convier
         Genera un hash seguro para la contraseña proporcionada y lo almacena en `password_hash`.
         Valida primero la complejidad de la contraseña antes de encriptarla.
         """
-        if not self.validate_password(password):  # Verificamos si la contraseña cumple los criterios de complejidad.
-            raise ValueError("Invalid password")  # Si no cumple, se lanza un error.
         self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')  # Hash seguro para la contraseña.
+        # if not self.validate_password(password):  # Verificamos si la contraseña cumple los criterios de complejidad.
+        #     raise ValueError("Invalid password")  # Si no cumple, se lanza un error.
+        # self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')  # Hash seguro para la contraseña.
 
     # Método para verificar una contraseña
     def check_password(self, password):
