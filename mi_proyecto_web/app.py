@@ -1,4 +1,31 @@
-from flask import Flask, render_template, request, redirect, session, url_for, flash, send_file, jsonify, send_from_directory, Blueprint
+"""
+Archivo: app.py  
+Descripción: Procesa archivos Excel, limpia datos y los guarda en una base de datos SQL Server.  
+
+Autores:  
+- Federico Dargallo (GitHub: Fede80)  
+- Kevin Rubi (GitHub: kevoru18)  
+
+Fecha de creación: 01/09/2024  
+Última actualización: 10/01/2025  
+
+Tecnologías utilizadas:  
+- Python  
+- Flask (framework web)  
+- SQL Server (base de datos)  
+
+Estructura del código:  
+1. Importaciones  
+2. Conexión con la base de datos  
+3. Funciones para procesamiento de datos  
+4. Rutas Flask  
+
+Licencia:  
+Este código está bajo la licencia MIT.
+"""
+
+
+from flask import Flask, render_template, request, redirect, session, url_for, flash, send_file, jsonify, send_from_directory, Blueprint,Response
 import time
 from flask_login import login_user, logout_user,login_required,LoginManager 
 
@@ -38,9 +65,19 @@ app.secret_key = "your_secret_key" #Esto es para evitar que los datos sean visib
 # configuracion de base de datos para login
 
 # Configuración para conectar con SQL Server
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    'mssql+pyodbc://sa:infinity@192.168.201.12/_RRHH?driver=ODBC+Driver+17+for+SQL+Server'
-)  # Cadena de conexión para la base de datos. Recomendación: usar variables de entorno para evitar exponer credenciales.
+app.config['SQLALCHEMY_BINDS'] = {
+# (
+   'rrhh':  'mssql+pyodbc://sa:infinity@192.168.201.12/_RRHH?driver=ODBC+Driver+17+for+SQL+Server',
+    'krubi_tests': 'mssql+pyodbc://sa:infinity@192.168.201.12/_krubi_tests?driver=ODBC+Driver+17+for+SQL+Server'
+}
+# )  # Cadena de conexión para la base de datos. Recomendación: usar variables de entorno para evitar exponer credenciales.
+
+# esta es la buena
+# # Configuración para conectar con SQL Server
+# app.config['SQLALCHEMY_DATABASE_URI'] = (
+#     'mssql+pyodbc://sa:infinity@192.168.201.12/_RRHH?driver=ODBC+Driver+17+for+SQL+Server'
+# )
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Desactiva el seguimiento de modificaciones para mejorar el rendimiento.
 
 # Inicializamos SQLAlchemy con la configuración de Flask
@@ -59,6 +96,7 @@ db = SQLAlchemy(app)  # Vincula la instancia de la base de datos a la aplicació
 
 # Definimos el modelo de datos para los usuarios
 class User(db.Model):  # La clase `User` hereda de `db.Model`, lo que la convierte en un modelo de SQLAlchemy.
+    __bind_key__ = 'rrhh'
     __tablename__ = 'Contactos'  # Nombre de la tabla en la base de datos.
   # Mapeo de columnas
     id = db.Column(db.Integer, primary_key=True)  # Corresponde al campo `ID`.
@@ -118,20 +156,20 @@ class User(db.Model):  # La clase `User` hereda de `db.Model`, lo que la convier
 
 
 
-# class UserDetails(db2.Model):
-#     __bind_key__ = 'db2'  # Indica que este modelo pertenece a la segunda base de datos
-#     __tablename__ = 'UserDetails'  # Asegúrate de que coincida con el nombre de la tabla en la base de datos
+class UsuariosApp(db.Model):
+    __bind_key__ = 'krubi_tests'  # Indica que este modelo pertenece a la segunda base de datos
+    __tablename__ = 'USUARIOS_APP'  # Asegúrate de que coincida con el nombre de la tabla en la base de datos
 
-#     id = db2.Column(db2.Integer, primary_key=True)  # Clave primaria
-#     username = db2.Column(db2.String(50), unique=True, nullable=False)  # Nombre de usuario único y obligatorio
-#     password_hash = db2.Column(db2.String(255), nullable=False)  # Hash de la contraseña
-#     email = db2.Column(db2.String(100), unique=True, nullable=False)  # Correo único y obligatorio
-#     is_active = db2.Column(db2.Boolean, default=True)  # Estado activo por defecto
-#     created_at = db2.Column(db2.DateTime, default=db2.func.getdate())  # Fecha de creación por defecto
-#     last_login = db2.Column(db2.DateTime, nullable=True)  # Último inicio de sesión
+    id = db.Column(db.Integer, primary_key=True)  # Clave primaria
+    username = db.Column(db.String(50), unique=True, nullable=False)  # Nombre de usuario único y obligatorio
+    password_hash = db.Column(db.String(255), nullable=False)  # Hash de la contraseña
+    email = db.Column(db.String(100), unique=True, nullable=False)  # Correo único y obligatorio
+    is_active = db.Column(db.Boolean, default=True)  # Estado activo por defecto
+    created_at = db.Column(db.DateTime, default=db.func.getdate())  # Fecha de creación por defecto
+    last_login = db.Column(db.DateTime, nullable=True)  # Último inicio de sesión
 
-#     def __repr__(self):
-#         return f"<UserDetails(username={self.username}, email={self.email}, is_active={self.is_active})>"
+    # def __repr__(self):
+    #     return f"<UserDetails(username={self.username}, email={self.email}, is_active={self.is_active})>"
 
 
 
@@ -156,7 +194,9 @@ def inicio():
 
 @app.route('/index')
 def index():
-    return render_template('index.html')
+    if "username" in session:
+        return render_template('index.html')
+    return render_template('login.html')
 
 @app.route('/main_app')
 def main_app():
@@ -174,7 +214,7 @@ def login():
          # Obtiene la contraseña enviada desde el formulario
         password = data.get('password')
         # print('Username recibido:', username)
-        # print('Username recibido:', password)
+        # # print('Username recibido:', password)
         # Validación del lado del servidor: verifica que el nombre de usuario tenga un formato válido
         # if not User.validate_username(username):
         #     # Si el formato no es válido, devuelve un mensaje de error en formato JSON
@@ -189,7 +229,9 @@ def login():
             apellido1 = user.apellido1
             nombre = user.nombre
             usuario= user.usuario_windows
-            print('Username recibido:', nombre + ' ' + apellido1+ ' ' + usuario)
+            ID_usuario = user.id
+            ID_usuario_texto = str(ID_usuario)
+            # print('Username recibido:', nombre + ' ' + apellido1+ ' ' + usuario + ' ' + ID_usuario_texto)
             # Actualiza la fecha y hora del último inicio de sesión
             # user.last_login = datetime.utcnow()
             # Guarda los cambios en la base de datos
@@ -197,9 +239,21 @@ def login():
             # Inicia la sesión del usuario utilizando Flask-Login
             # login_user(user)
             session['username']=username
-            # Renderiza la plantilla 'inicio.html' en caso de inicio de sesión exitoso
-            print('Entro en login')
-            return jsonify({'success': True, 'redirect': '/inicio'})
+            
+            # print('Entro en login')
+                # 2. Buscar en UsuariosApp (prueba) usando el ID del contacto
+            usuario_app = UsuariosApp.query.filter_by(id=ID_usuario).first()
+            # app_username = usuario_app.username
+            if check_password_hash(usuario_app.password_hash, password):
+                # print('Password correcta', usuario_app.password_hash)
+                # Hash and update password
+                # password_hash = set_password(new_password)
+                # Renderiza la plantilla 'inicio.html' en caso de inicio de sesión exitoso
+                # print('Entro en password')
+                    # 2. Buscar en UsuariosApp (prueba) usando el ID del contacto
+                # Renderiza la plantilla 'inicio.html' en caso de inicio de sesión exitoso
+                # print('Usuario App recibido:', app_username)
+                return jsonify({'success': True, 'redirect': '/inicio'})
             
         
             
@@ -209,7 +263,6 @@ def login():
     
     # Si el método no es POST (es GET), muestra la página de inicio de sesión
     return render_template('login.html')
-
 # Ver esto:https://www.youtube.com/watch?v=Fr2MxT9M0V4
 
 # Ruta para cerrar sesión
@@ -353,39 +406,40 @@ def generar_graficos(resultados, db_name):
 
 @app.route('/graficos', methods=['GET', 'POST'])
 def graficos():
-    if request.method == 'POST':
-        db_name = request.form.get('db_name')
+    if "username" in session:
+        if request.method == 'POST':
+            db_name = request.form.get('db_name')
 
-        if not db_name:
-            return "Por favor, introduce una base de datos.", 400
+            if not db_name:
+                return "Por favor, introduce una base de datos.", 400
 
-        try:
-            connection = get_connection(db_name)
+            try:
+                connection = get_connection(db_name)
 
-            query1 = "SELECT TotalRecords, CompleteRecords, CorrectionRecords FROM CNAE_KPI_Audit"
-            query2 = "SELECT CAST(ClickDate AS DATE) AS ClickDate, COUNT(*) AS ClickCount FROM LinkedinClickLog GROUP BY CAST(ClickDate AS DATE)"
-            query3 = "SELECT COUNT(*) AS Total, SUM(CASE WHEN PERSONA_CONTACTADA IS NOT NULL THEN 1 ELSE 0 END) AS Contactadas FROM Empresas"
+                query1 = "SELECT TotalRecords, CompleteRecords, CorrectionRecords FROM CNAE_KPI_Audit"
+                query2 = "SELECT CAST(ClickDate AS DATE) AS ClickDate, COUNT(*) AS ClickCount FROM LinkedinClickLog GROUP BY CAST(ClickDate AS DATE)"
+                query3 = "SELECT COUNT(*) AS Total, SUM(CASE WHEN PERSONA_CONTACTADA IS NOT NULL THEN 1 ELSE 0 END) AS Contactadas FROM Empresas"
 
-            resultados = [
-                ejecutar_consulta(connection, query1),
-                ejecutar_consulta(connection, query2),
-                ejecutar_consulta(connection, query3)
-            ]
+                resultados = [
+                    ejecutar_consulta(connection, query1),
+                    ejecutar_consulta(connection, query2),
+                    ejecutar_consulta(connection, query3)
+                ]
 
             # Log de los resultados de las consultas
-            logging.info(f"Resultados de la consulta 1: {resultados[0]}")
-            logging.info(f"Resultados de la consulta 2: {resultados[1]}")
-            logging.info(f"Resultados de la consulta 3: {resultados[2]}")
+                logging.info(f"Resultados de la consulta 1: {resultados[0]}")
+                logging.info(f"Resultados de la consulta 2: {resultados[1]}")
+                logging.info(f"Resultados de la consulta 3: {resultados[2]}")
 
-            imagenes_base64, pdf_buffer = generar_graficos(resultados, db_name)
+                imagenes_base64, pdf_buffer = generar_graficos(resultados, db_name)
 
-            return render_template('graficos.html', imagenes_base64=imagenes_base64, pdf_link=url_for('descargar_pdf_file', db_name=db_name))
-        except Exception as e:
-            logging.error(f"Ocurrió un error: {e}")
-            return f"Ocurrió un error: {e}", 500
+                return render_template('graficos.html', imagenes_base64=imagenes_base64, pdf_link=url_for('descargar_pdf_file', db_name=db_name))
+            except Exception as e:
+                logging.error(f"Ocurrió un error: {e}")
+                return f"Ocurrió un error: {e}", 500
 
-    return render_template('graficos.html')
-
+        return render_template('graficos.html')
+    return render_template('login.html')
 @app.route('/descargar_pdf/<db_name>', methods=['GET'])
 def descargar_pdf_file(db_name):
     try:
@@ -498,6 +552,11 @@ def log_usuario(nombre_usuario, nombre_archivo, registros_originales, registros_
         f"Registros originales: {registros_originales}, Teléfonos limpios: {registros_limpios}"
     )
     print("Log de usuario registrado.")
+    
+    # Enviar un evento SSE al cliente
+    def generate_event():
+        yield "data: iniciarCarga()\n\n"  # Indica al cliente que ejecute la función
+    return Response(generate_event(), mimetype='text/event-stream')
 
 def limpiar_telefono(telefono):
     if pd.isna(telefono):
@@ -510,163 +569,180 @@ def limpiar_telefono(telefono):
 progress = 0
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    global progress
-    total_steps = 100
+    if "username" in session:
+        global progress
+        # nuevo
+        progress = 0  # Reiniciar progreso
+        total_steps = 100
    
-    if 'file' not in request.files:
-        flash('No file part')
-        return redirect(url_for('index'))
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(url_for('index'))
 
-    file = request.files['file']
-    if file.filename == '':
-        flash('No selected file')
-        return redirect(url_for('index'))
+        file = request.files['file']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(url_for('index'))
 
-    if file:
-        filepath = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(filepath)
+        if file:
+            filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+            file.save(filepath)
 
         # Procesar el archivo Excel
-        df = pd.read_excel(filepath)
+            df = pd.read_excel(filepath)
 
         # Loguear los datos iniciales
-        registros_originales = len(df)
-        nombre_usuario = getpass.getuser()  # Obtener el nombre del usuario logueado
+            registros_originales = len(df)
+            nombre_usuario = getpass.getuser()  # Obtener el nombre del usuario logueado
 
         # Renombrar las columnas a un formato estándar
-        df.rename(columns=lambda x: x.strip().lower(), inplace=True)
-        df.rename(columns={
-            'telefono': 'telefono',
-            'teléfono': 'telefono',
-            'telf1': 'telefono',
-            'tel1': 'telefono',
-            'telefono1': 'telefono',
-            'TELEFONO1': 'telefono',
-            'TELEFONO': 'telefono',
-            'phone': 'telefono'
-        }, inplace=True)
+            df.rename(columns=lambda x: x.strip().lower(), inplace=True)
+            df.rename(columns={
+                'telefono': 'telefono',
+                'teléfono': 'telefono',
+                'telf1': 'telefono',
+                'tel1': 'telefono',
+                'telefono1': 'telefono',
+                'TELEFONO1': 'telefono',
+                'TELEFONO': 'telefono',
+                'phone': 'telefono'
+            }, inplace=True)
 
         # Verificar si 'telefono' existe
-        if 'telefono' not in df.columns:
-            raise KeyError("No se encontró la columna 'telefono' en el DataFrame.")
+            if 'telefono' not in df.columns:
+                raise KeyError("No se encontró la columna 'telefono' en el DataFrame.")
 
         # Limpiar los teléfonos
-        total_steps = len(df) + 3  # Procesos principales + registros
-        df['telefono_limpio'] = df['telefono'].apply(limpiar_telefono)
-        registros_limpios = df['telefono_limpio'].notnull().sum()
+            total_steps = len(df) + 3  # Procesos principales + registros
+            df['telefono_limpio'] = df['telefono'].apply(limpiar_telefono)
+            registros_limpios = df['telefono_limpio'].notnull().sum()
 
  # Simulación del progreso: Renombrar columnas
-        progress = int((1 / total_steps) * 100)
-        time.sleep(0.5)  # Simular demora
+            progress = int((1 / total_steps) * 100)
+            time.sleep(0.5)  # Simular demora
         # Registrar la actividad en el log
-        log_usuario(nombre_usuario, file.filename, registros_originales, registros_limpios)
+            log_usuario(nombre_usuario, file.filename, registros_originales, registros_limpios)
 
         # Conectar a la base de datos y ejecutar la lógica de scoring
-        with engine.connect() as conn:
-            total_steps = 3  # Número total de pasos
-            current_step = 1
+            with engine.connect() as conn:
+                total_steps = 3  # Número total de pasos
+                current_step = 1
             # send_progress_update(current_step, total_steps)
-            for index, row in df.iterrows():
-                telefono = str(row['telefono'])
+                for index, row in df.iterrows():
+                    telefono = str(row['telefono'])
 
                 # Consulta de scoring
-                query_scoring = text("""
-                    SELECT CASE 
-                        WHEN COUNT(*) >= 20 THEN (CAST(SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*)) * 100 
-                        ELSE (SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END) / 20.0) * 100 
-                    END AS conteo 
-                    FROM ODCalls WHERE ANI = :telefono
-                """)
-                result_scoring = conn.execute(query_scoring, {'telefono': telefono}).fetchone()
-                conteo = result_scoring[0] if result_scoring else 0
-                df.at[index, 'scoring'] = conteo
+                    query_scoring = text("""
+                        SELECT CASE 
+                            WHEN COUNT(*) >= 20 THEN (CAST(SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END) AS FLOAT) / COUNT(*)) * 100 
+                            ELSE (SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END) / 20.0) * 100 
+                        END AS conteo 
+                        FROM ODCalls WHERE ANI = :telefono
+                    """)
+                    result_scoring = conn.execute(query_scoring, {'telefono': telefono}).fetchone()
+                    conteo = result_scoring[0] if result_scoring else 0
+                    df.at[index, 'scoring'] = conteo
 
                 # Consulta de media de intentos para contacto
-                query_media_intentos = text("""
-                    SELECT CASE 
-                        WHEN COUNT(*) >= 20 THEN (COUNT(*) / CAST(NULLIF(SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END), 0) AS FLOAT)) 
-                        ELSE (20.0 / NULLIF(SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END), 0))  
-                    END AS conteo 
-                    FROM ODCalls 
-                    WHERE ANI = :telefono AND Duration > 1
-                """)
+                    query_media_intentos = text("""
+                        SELECT CASE 
+                            WHEN COUNT(*) >= 20 THEN (COUNT(*) / CAST(NULLIF(SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END), 0) AS FLOAT)) 
+                            ELSE (20.0 / NULLIF(SUM(CASE WHEN CallStatusNum < 11 THEN 1 ELSE 0 END), 0))  
+                        END AS conteo 
+                        FROM ODCalls 
+                        WHERE ANI = :telefono AND Duration > 1
+                    """)
 
-                result_media_intentos = conn.execute(query_media_intentos, {'telefono': telefono}).fetchone()
-                media_intentos = result_media_intentos[0] if result_media_intentos else None
-                df.at[index, 'media_intentos_para_contacto'] = media_intentos
+                    result_media_intentos = conn.execute(query_media_intentos, {'telefono': telefono}).fetchone()
+                    media_intentos = result_media_intentos[0] if result_media_intentos else None
+                    df.at[index, 'media_intentos_para_contacto'] = media_intentos
 
                 # Consulta de media de intentos para contacto positivo
-                query_media_intentos_positivo = text("""
-                    SELECT 
-                        CASE 
-                            WHEN COUNT(CASE WHEN Duration > 1 AND CallStatusNum BETWEEN 1 AND 10 THEN 1 END) = 0 THEN 0
-                            ELSE COUNT(*) * 1.0 / COUNT(CASE WHEN Duration > 1 AND CallStatusNum BETWEEN 1 AND 10 THEN 1 END)
-                        END AS media_llamadas_para_contacto_positivo
-                    FROM ODCalls
-                    WHERE ANI = :telefono AND (Duration > 1 OR CallStatusNum BETWEEN 1 AND 10)
-                """)
+                    query_media_intentos_positivo = text("""
+                        SELECT 
+                            CASE 
+                                WHEN COUNT(CASE WHEN Duration > 1 AND CallStatusNum BETWEEN 1 AND 10 THEN 1 END) = 0 THEN 0
+                                ELSE COUNT(*) * 1.0 / COUNT(CASE WHEN Duration > 1 AND CallStatusNum BETWEEN 1 AND 10 THEN 1 END)
+                            END AS media_llamadas_para_contacto_positivo
+                        FROM ODCalls
+                        WHERE ANI = :telefono AND (Duration > 1 OR CallStatusNum BETWEEN 1 AND 10)
+                    """)
 
-                result_media_intentos_positivo = conn.execute(query_media_intentos_positivo, {'telefono': telefono}).fetchone()
-                  # Actualizar el progreso
-                progress = int(((index + 2) / total_steps) * 100)
-                time.sleep(0.1)  # Simular tiempo de procesamiento
-                current_step += 1
+                    result_media_intentos_positivo = conn.execute(query_media_intentos_positivo, {'telefono': telefono}).fetchone()
+                    # Actualizar el progreso
+                    progress = int(((index + 2) / total_steps) * 100)
+                    time.sleep(0.1)  # Simular tiempo de procesamiento
+                    current_step += 1
                 # send_progress_update(current_step, total_steps)
 
                 
                 
                 # Agregar un log para depuración
-                if result_media_intentos_positivo is None:
-                    logging.info(f'No se encontraron resultados para el teléfono: {telefono}')
+                    if result_media_intentos_positivo is None:
+                        logging.info(f'No se encontraron resultados para el teléfono: {telefono}')
                 #else:
                     #logging.info(f'Resultado para el teléfono {telefono}: {result_media_intentos_positivo[0]}')
 
-                media_intentos_positivo = result_media_intentos_positivo[0] if result_media_intentos_positivo else None
-                df.at[index, 'media_intentos_para_contacto_positivo'] = media_intentos_positivo
+                    media_intentos_positivo = result_media_intentos_positivo[0] if result_media_intentos_positivo else None
+                    df.at[index, 'media_intentos_para_contacto_positivo'] = media_intentos_positivo
 
         # Ordenar el DataFrame de mayor a menor según el scoring
-        df.sort_values(by='scoring', ascending=False, inplace=True)
+            df.sort_values(by='scoring', ascending=False, inplace=True)
+        # Limitar a los primeros 5 registros
+            df = df.head(5)
 
         # Convertir los valores numéricos pequeños a un formato más legible con 2 decimales
-        df['media_intentos_para_contacto_positivo'] = df['media_intentos_para_contacto_positivo'].apply(lambda x: '{:.2f}'.format(x) if pd.notna(x) else x)
+            df['media_intentos_para_contacto_positivo'] = df['media_intentos_para_contacto_positivo'].apply(lambda x: '{:.2f}'.format(x) if pd.notna(x) else x)
 
         # Guardar el archivo Excel con el scoring, media de intentos y todos los datos
-        output_filepath = os.path.join(UPLOAD_FOLDER, 'resultados_Scoring.xlsx')
-        df.to_excel(output_filepath, index=False)
+            output_filepath = os.path.join(UPLOAD_FOLDER, 'resultados_Scoring.xlsx')
+            df.to_excel(output_filepath, index=False)
 
         # Aplicar estilo de colores en la columna 'scoring' usando openpyxl
-        wb = load_workbook(output_filepath)
-        ws = wb.active
-        scoring_column_index = ws.max_column - 2  # Columna 'scoring'
-        media_intentos_column_index = ws.max_column - 1  # Columna 'media_intentos_para_contacto'
-        media_intentos_positivo_column_index = ws.max_column  # Última columna es 'media_intentos_para_contacto_positivo'
+            wb = load_workbook(output_filepath)
+            ws = wb.active
+            scoring_column_index = ws.max_column - 2  # Columna 'scoring'
+            media_intentos_column_index = ws.max_column - 1  # Columna 'media_intentos_para_contacto'
+            media_intentos_positivo_column_index = ws.max_column  # Última columna es 'media_intentos_para_contacto_positivo'
 
-        for row in range(2, ws.max_row + 1):  # Empezamos en la fila 2 para evitar el encabezado
-            score = ws.cell(row=row, column=scoring_column_index).value
-            if score is not None:
+            for row in range(2, ws.max_row + 1):  # Empezamos en la fila 2 para evitar el encabezado
+                score = ws.cell(row=row, column=scoring_column_index).value
+                if score is not None:
                 # Definir el color basado en el score (de verde a rojo)
-                red = int(min(255, (255 - int(2.55 * score))))
-                green = int(min(255, int(2.55 * score)))
-                fill = PatternFill(start_color=f"{red:02X}{green:02X}00", end_color=f"{red:02X}{green:02X}00", fill_type="solid")
+                    red = int(min(255, (255 - int(2.55 * score))))
+                    green = int(min(255, int(2.55 * score)))
+                    fill = PatternFill(start_color=f"{red:02X}{green:02X}00", end_color=f"{red:02X}{green:02X}00", fill_type="solid")
                 
-                ws.cell(row=row, column=scoring_column_index).fill = fill
+                    ws.cell(row=row, column=scoring_column_index).fill = fill
 
-        wb.save(output_filepath)
-        wb.close()
+            wb.save(output_filepath)
+            wb.close()
 
         # Generar la tabla HTML para mostrar en el navegador
-        resultados_limpieza = df.to_html(classes=['table', 'scoring'], justify='center')
+            resultados_limpieza = df.to_html(classes=['table', 'scoring'], justify='center')
           # Finalizar el progreso
-        progress = 100
-        time.sleep(0.5)
+            progress = 100
+            time.sleep(0.5)
 
-        return render_template('resultados.html', tabla=resultados_limpieza) #jsonify({'progress': 100, 'results': resultados_limpieza})             #      #, 
+            return render_template('resultados.html', tabla=resultados_limpieza) #jsonify({'progress': 100, 'results': resultados_limpieza})             #      #, 
+    return render_template('login.html')
     
     
+    
+    
+    
+    
+    
+    
+    # barra
 @app.route('/progress', methods=['GET'])
 def get_progress():
     global progress
     return jsonify({'progress': progress})
+
+
+
+
 
 @app.route('/download')
 def download_file():

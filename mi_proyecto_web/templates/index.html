@@ -1,3 +1,26 @@
+<!-- 
+Archivo: index.html  
+Descripción: Página principal para cargar archivos y mostrar resultados procesados.  
+
+Autores:  
+- Federico Dargallo (GitHub: Fede80)  
+- Kevin Rubi (GitHub: kevoru18)  
+
+Fecha de creación: 20/10/2024  
+Última actualización: 10/01/2025  
+
+Tecnologías utilizadas:  
+- HTML5  
+- CSS3  
+- Bootstrap (para diseño y componentes)  
+
+Estructura:  
+1. Head: Metadatos, Bootstrap, estilos  
+2. Body: Formulario de carga, barra de progreso y sección de resultados  
+
+Licencia:  
+Este código está bajo la licencia MIT.
+-->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
@@ -180,7 +203,7 @@ table, td { color: #ffffff; } #u_body a { color: #0000ee; text-decoration: under
 
 </head>
 
-<body class="clean-body u_body" style="margin: 0;padding: 0;-webkit-text-size-adjust: 100%;background-color: #ffffff;color: #ffffff">
+<body class="clean-body u_body" style="margin: 0;padding: 0;-webkit-text-size-adjust: 100%;background-color: #ffffff;color: #ffffff" onload="listenToServer()">
  
   <table id="u_body" style="border-collapse: collapse;table-layout: fixed;border-spacing: 0;mso-table-lspace: 0pt;mso-table-rspace: 0pt;vertical-align: top;min-width: 320px;Margin: 0 auto;background-color: #ffffff;width:100%" cellpadding="0" cellspacing="0">
   <tbody>
@@ -262,6 +285,7 @@ table, td { color: #ffffff; } #u_body a { color: #0000ee; text-decoration: under
 
 <table id="u_content_button_1" style="font-family:'Raleway',sans-serif;" role="presentation" cellpadding="0" cellspacing="0" width="100%" border="0">
   <tbody>
+    
     <tr>
       <td class="v-container-padding-padding" style="overflow-wrap:break-word;word-break:break-word;padding:10px 10px 60px;font-family:'Raleway',sans-serif;" align="left">
         <h3 class="v-text-align v-line-height v-font-size" style="margin: 10px; color: #25c3eb; line-height: 100%; text-align: center; word-wrap: break-word; 
@@ -269,18 +293,32 @@ table, td { color: #ffffff; } #u_body a { color: #0000ee; text-decoration: under
         <span style="line-height: 28.8px;"><span style="line-height: 28.8px;">
           <span style="line-height: 28.8px;">
           <strong>Subir archivo Excel</strong></span></span></span>
+
+
+
+          <h3 class="v-text-align v-line-height v-font-size" style="margin: 10px; color: #25c3eb; line-height: 100%; text-align: center; word-wrap: break-word; 
+          font-family: 'Open Sans',sans-serif; font-size: 24px; font-weight: 40;"><span><span><span><span style="line-height: 28.8px;"><span style="line-height: 28.8px;">
+          <span style="line-height: 28.8px;"><span style="line-height: 28.8px;">
+            <span style="line-height: 28.8px;">
+            <strong>   <a class="btn btn-outline-success" href="{{ url_for('inicio') }}" style="border-radius: 5rem;">
+              <img style="height: 28.8px;" src="{{ url_for('static', filename='images/atras.png') }}" alt=""> Regresar 
+              </a></strong></span></span></span>
+         
+
+           <!-- Primera imagen que enlaza a la página de carga de archivos (index) -->
+         
           <h3 class="v-text-align v-line-height v-font-size" style="margin: 10px; color: #25c3eb; line-height: 100%; text-align: center; word-wrap: break-word; 
           font-family: 'Open Sans',sans-serif; font-size: 24px; font-weight: 40;"><span><span><span><span style="line-height: 28.8px;"><span style="line-height: 28.8px;">
           <span style="line-height: 28.8px;"><span style="line-height: 28.8px;">
             <span style="line-height: 28.8px;">
            
 
-<form action="/upload" method="post" enctype="multipart/form-data">
-    <div class="input-group">
-        <input type="file" class="form-control" name="file" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" required>
-        <button class="btn btn-outline-secondary" type="submit"  id="inputGroupFileAddon04">Subir archivo</button>
-    </div>
-</form>
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <div class="input-group">
+                    <input type="file" class="form-control" name="file" id="inputGroupFile04" aria-describedby="inputGroupFileAddon04" aria-label="Upload" required>
+                    <button class="btn btn-outline-secondary" type="submit"  id="inputGroupFileAddon04">Subir archivo</button>
+                </div>
+            </form>
 
     <!-- Imagen GIF que se mostrará mientras carga -->
     <img id="loadingGif" src="{{ url_for('static', filename='images/simpsons-monkey.gif') }}"  alt="Cargando...">
@@ -402,96 +440,61 @@ table, td { color: #ffffff; } #u_body a { color: #0000ee; text-decoration: under
   </tr>
   </tbody>
   </table>
-<!-- 
-  <script>
-    // Función para simular el progreso de carga
-    function iniciarCarga() {
-        var progreso = 0;
-        var progressBar = document.getElementById("progressBar");
-        var progressContainer = document.getElementById("progressContainer");
-        var loadingGif = document.getElementById("loadingGif");
-        var startButton = document.getElementById("inputGroupFileAddon04");
 
-        // Mostrar el GIF y la barra de progreso
-        progressContainer.style.display = "block";
-        loadingGif.style.display = "block";
-        //startButton.style.display = "none"; // Ocultar el botón
-
-        // Simular un intervalo de carga
-        /*var interval = setInterval(function() {
-            if (progreso >= 100) {
-                clearInterval(interval); // Detener el intervalo cuando llegue al 100%
-                loadingGif.style.display = "none"; // Ocultar el GIF cuando termine
-            } else {
-                progreso++;
-                progressBar.style.width = progreso + "%";
-                progressBar.innerHTML = progreso + "%";
-            }
-        }, 100); // Aumenta el progreso cada 100ms (ajustar si se desea más rápido o más lento)*/
-    }
-</script> -->
-<script>
-function iniciarCarga() {
-  var progreso = 0;
-        var progressBar = document.getElementById("progressBar");
-        var progressContainer = document.getElementById("progressContainer");
-        var loadingGif = document.getElementById("loadingGif");
-        var startButton = document.getElementById("inputGroupFileAddon04");
-
-        // Mostrar el GIF y la barra de progreso
-        progressContainer.style.display = "block";
-        loadingGif.style.display = "block";
-        //startButton.style.display = "none"; // Ocultar el botón
-
-        // Simular un intervalo de carga
-        /*var interval = setInterval(function() {
-            if (progreso >= 100) {
-                clearInterval(interval); // Detener el intervalo cuando llegue al 100%
-                loadingGif.style.display = "none"; // Ocultar el GIF cuando termine
-            } else {
-                progreso++;
-                progressBar.style.width = progreso + "%";
-                progressBar.innerHTML = progreso + "%";
-            }
-        }, 100); // Aumenta el progreso cada 100ms (ajustar si se desea más rápido o más lento)*/
-    
-        function checkProgress() {
-    fetch('/progress', {
-        method: 'GET', // Cambia a GET ya que solo estamos consultando el progreso
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            alert(data.error);
-        } else {
-            progressBar.style.width = data.progress + '%';
-            progressBar.innerHTML = data.progress + '%';
-
-            if (data.progress < 100) {
-                setTimeout(checkProgress, 500);
-            } else {
-                progressContainer.style.display = "none";
-                loadingGif.style.display = "none";
-
-                // Mostrar los resultados si están disponibles
-                var resultsContainer = document.getElementById("resultsContainer");
-                if (data.results) {
-                    resultsContainer.innerHTML = data.results;
-                }
-            }
-        }
-    })
-    .catch(error => {
-        console.error('Error checking progress:', error);
-    });
-}
+ <script>
+ 
 
 
-    checkProgress();
-}
+// //  Nueva versión de barra de progreso en JS 
+//         async function iniciarCarga(event) {
+//             event.preventDefault(); // Evitar envío automático del formulario
+//             const form = event.target; // Obtener el formulario
+//             const progressBarContainer = document.getElementById("progressContainer");
+//             const progressBar = document.getElementById("progressBar");
+
+//             // Mostrar la barra de progreso
+//             progressBarContainer.style.display = "block";
+
+//             // Enviar el formulario de manera asíncrona
+//             const formData = new FormData(form);
+//             await fetch(form.action, {
+//                 method: form.method,
+//                 body: formData,
+//             });
+
+//             // Actualizar la barra de progreso
+//             const interval = setInterval(async () => {
+//                 const response = await fetch('/progress');
+//                 const data = await response.json();
+//                 const progress = data.progress;
+
+//                 progressBar.style.width = progress + "%";
+//                 progressBar.textContent = progress + "%";
+
+//                 if (progress >= 100) {
+//                     clearInterval(interval); // Detener la actualización
+//                     alert("Proceso completado");
+//                 }
+//             }, 500); // Actualiza cada 500ms
+//         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </script>
   </body>
