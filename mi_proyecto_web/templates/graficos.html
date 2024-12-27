@@ -236,7 +236,7 @@ table, td { color: #070707; } #u_body a { color: #0000ee; text-decoration: under
              
   
         <!-- Primera imagen que enlaza a la página de carga de archivos (index) -->
-        <a class="btn btn-outline-success" href="{{ url_for('index') }}" style="border-radius: 5rem;">
+        <a class="btn btn-outline-success" href="{{ url_for('inicio') }}" style="border-radius: 5rem;">
             <img style="height: 28.8px;" src="{{ url_for('static', filename='images/atras.png') }}" alt="Carga de Archivos"> Regresar 
             <!-- <img style="height: 28.8px;" src="C:\Users\krubi\Downloads\arrows.png" alt="Carga de Archivos"> Indice contacto-->
         </a>
@@ -256,11 +256,35 @@ table, td { color: #070707; } #u_body a { color: #0000ee; text-decoration: under
     </div>
     </div>
     
-    <form method="POST" action="/graficos">
+    <!-- <form method="POST" action="/graficos">
         <label for="db_name">Nombre de la base de datos:</label>
         <input type="text" id="db_name" name="db_name" required>
         <button type="submit">Generar Gráficos</button>
     </form>
+
+    Primera imagen que enlaza a la página de carga de archivos (index) 
+     -->    
+   <h3 class="v-text-align v-line-height v-font-size" style="margin: 10px; color: #25c3eb; line-height: 100%; text-align: center; word-wrap: break-word; 
+   font-family: 'Open Sans',sans-serif; font-size: 24px; font-weight: 40;"><span><span><span><span style="line-height: 28.8px;"><span style="line-height: 28.8px;">
+   <span style="line-height: 28.8px;"><span style="line-height: 28.8px;">
+     <span style="line-height: 28.8px;">
+     
+        <div class="container">  
+            <div class="table-responsive">
+           
+     <form action="/graficos" method="post" enctype="multipart/form-data">
+         <div class="input-group">
+            <label  style="margin-bottom: 5px; margin-left: 150px;  border-radius: 5rem;" for="db_name">Nombre de la base de datos:</label>
+             <input type="text"  type="text" id="db_name" class=" input-m" style="width: 350px; margin-left: 10px;  border-radius: 5rem;" name="db_name" aria-describedby="inputGroupFileAddon04" required>
+            
+             <button class="btn btn-outline-secondary" type="submit" style="border-radius: 5rem;"  id="inputGroupFileAddon04"> <img style="height: 28.8px;" src="{{ url_for('static', filename='images/grafico-linea.png') }}" alt="Carga de Archivos">
+                Generar Gráficos</button>
+              </a>
+         </div>
+     </form>
+    </div>
+
+
 
     {% if imagenes_base64 %}
         {% for img in imagenes_base64 %}
@@ -271,11 +295,19 @@ table, td { color: #070707; } #u_body a { color: #0000ee; text-decoration: under
             {% endif %}
         {% endfor %}
         <br>
-        <a href="{{ pdf_link }}">Descargar PDF</a>
+
+        <a class="btn btn-outline-success" href="{{ pdf_link }}" style="border-radius: 5rem;">
+            <img style="height: 28.8px;" src="{{ url_for('static', filename='images/descargar.png') }}" alt="Carga de Archivos">Descargar PDF
+            <!-- <img style="height: 28.8px;" src="C:\Users\krubi\Downloads\arrows.png" alt="Carga de Archivos"> Indice contacto-->
+        </a>
+
+
+
+        <!-- <a href="{{ pdf_link }}">Descargar PDF</a> -->
     {% endif %}
     
- 
- 
+</div>
+ <br><br>
     <div class="u-row-container v-row-padding--vertical" style="padding: 0px;background-color: transparent">
         <div class="u-row no-stack" style="margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;
         background-color: transparent;">
